@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:og="https://ogp.me/ns#"
+      xmlns:fb="https://www.facebook.com/2008/fbml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    
+        <meta name="author" content="Andy Pavlo" />
+        <meta name="description" content="Do not post your project on a public Github repository. Overview The second programming project is to implement an index in your database system. The index is responsible for fast data retrieval without having to search through every row in a database table, providing the basis for both rapid random lookups and efficient access of ordered records. You will need to implement B+Tree dynamic index structure. It is a balanced tree in which the internal pages direct the search and leaf pages contains actual data entries. Since the tree structure grows and shrink dynamically, you are required to handle …" />
+    
+    <meta name="keywords" content="" />
+    <!--[if lte IE 8]><script src="../css/ie/html5shiv.js"></script><![endif]-->
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery.dropotron.min.js"></script>
+    <script src="../js/skel.min.js"></script>
+    <script src="../js/skel-layers.min.js"></script>
+    <script src="../js/init.js"></script>
+    <link rel="stylesheet" href="../css/pygment.css" />
+    <noscript>
+        <link rel="stylesheet" href="../css/skel.css" />
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/style-noscript.css" />
+    </noscript>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link  href="//fonts.googleapis.com/css?family=Anonymous+Pro:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css" >
+    <!--[if lte IE 8]><link rel="stylesheet" href="/css/ie/v8.css" /><![endif]-->
+    <!--[if lte IE 9]><link rel="stylesheet" href="/css/ie/v9.css" /><![endif]-->
+    
+    
+    <meta property="og:site_name" content="CMU 15-445/645" />
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="Project #2 - B+Tree - CMU 15-445/645 :: Intro to Database Systems (Fall 2020)"/>
+    <meta property="og:url" content="../project2/index.html"/>
+    <meta property="article:published_time" content="2020-11-01" />
+    <meta property="og:description" content="Do not post your project on a public Github repository. Overview The second programming project is to implement an index in your database system. The index is responsible for fast data retrieval without having to search through every row in a database table, providing the basis for both rapid random lookups and efficient access of ordered records. You will need to implement B+Tree dynamic index structure. It is a balanced tree in which the internal pages direct the search and leaf pages contains actual data entries. Since the tree structure grows and shrink dynamically, you are required to handle …" />
+        <meta property="og:image"
+              content="https://15445.courses.cs.cmu.edu/fall2020/images/twitter-card.jpg"/>
+
+    <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@CMUDB">
+        <meta name="twitter:creator" content="@CMUDB">
+    <meta name="twitter:domain" content="..">
+            <meta property="twitter:image"
+                  content="https://15445.courses.cs.cmu.edu/fall2020/images/twitter-card.jpg"/>
+    
+    
+    <link href="https://db.cs.cmu.edu/favicon.png" rel="icon">
+
+    <title>Project #2 - B+Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2020) </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width">
+</head>
+
+<body class="">
+
+    <!-- Header -->
+    <header id="header" >
+        <h1 class="logo">
+            <a href="..">CMU 15-445/645</a>
+        </h1>
+        <nav id="nav">
+            <ul>
+                <li ><a href="..">Home</a></li>
+                            <li><a href="../assignments.html">Assignments</a>
+                            <li><a href="../faq.html">FAQ</a>
+                            <li><a href="../schedule.html">Schedule</a>
+                            <li><a href="../syllabus.html">Syllabus</a>
+                <!--
+                <li class="submenu">
+                    <a href="../">Blog</a>
+                    <ul>
+                    </ul>
+                </li>
+                -->
+                <li> <a title="Piazza" href="https://piazza.com/cmu/fall2020/15445645/" target="_new"><i class="fa fa-comments-o"></i> Piazza</a>
+                
+                <li><a href="#" class="dropdown-toggle" data-toggle="dropdown"  data-hover="dropdown" data-delay="1000" data-close-others="true"> <i class="fa fa-book"></i> Archives <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2019/" target="_new">Fall 2019</a></li>
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2018/" target="_new">Fall 2018</a></li>
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2017/" target="_new">Fall 2017</a></li>
+                </ul></li>
+            </ul>
+        </nav>
+    </header>
+
+<!-- Main -->
+<article id="main">
+
+    <header class="special container">
+        <span class="icon fa-database"></span>
+        <h2>Project #2 - B+Tree</h2>
+    </header>
+
+    <section class="wrapper style4 container">
+  
+        <!-- Content -->
+        <div class="content">
+            <section>
+                <p><p class="warning bg-fatal">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    Do <u>not</u> post your project on a public Github repository.
+</p>
+
+<!-- ========================================================================= -->
+
+<!-- OVERVIEW                                                                  -->
+
+<!-- ========================================================================= -->
+
+<h1 id="overview">Overview</h1>
+
+<p>The second programming project is to implement an <b>index</b> in your database system. The index is responsible for fast data retrieval without having to search through every row in a database table, providing the basis for both rapid random lookups and efficient access of ordered records.</p>
+<p>You will need to implement <a onclick="javascript:pageTracker._trackPageview('/outgoing/en.wikipedia.org');" href="https://en.wikipedia.org/wiki/B%2B_tree">B+Tree</a> dynamic index structure. It is a balanced tree in which the internal pages direct the search and leaf pages contains actual data entries. Since the tree structure grows and shrink dynamically, you are required to handle the logic of split and merge. The project is comprised of the following tasks and it has two checkpoints.</p>
+<p><b>Checkpoint #1 &mdash; Due Date: Oct 11 @ 11:59pm</b></p>
+<ul class="default">
+    <li> <a href="#b+tree-pages"><b>Task #1 - B+Tree Pages</b></a>
+    <li> <a href="#b+tree-structure-1"><b>Task #2.a - B+Tree Data Structure (Insertion & Point Search)</b></a>
+</ul>
+
+<p><b>Checkpoint #2 &mdash; Due Date: Oct 25 @ 11:59pm</b></p>
+<ul class="default">
+    <li> <a href="#b+tree-structure-2"><b>Task #2.b - B+Tree Data Structure (Deletion)</b></a>
+    <li> <a href="#index-iterator"><b>Task #3 - Index Iterator</b></a>
+    <li> <a href="#concurrent_index"><b>Task #4 - Concurrent Index</b></a>
+</ul>
+
+<p>This is a single-person project that will be completed individually (i.e., no groups).</p>
+<!-- START project2 -->
+
+<!-- AUTO-GENERATED BY GENERATE-SCHEDULE SCRIPT -->
+
+<!-- ANY MODIFICATIONS WILL BE OVERWRITTEN -->
+
+<ul>
+<li><b>Release Date:</b> Sep 28, 2020</li>
+<li><b>Due Date:</b> Nov 01, 2020 @ 11:59pm
+<!-- END project2 --></li>
+</ul>
+<!-- ========================================================================= -->
+
+<!-- PROJECT SPECIFICATION                                                     -->
+
+<!-- ========================================================================= -->
+
+<h1 id="specification">Project Specification</h1>
+
+<p>Like the first project, we are providing you with stub classes that contain the API that you need to implement. You should <strong>not</strong> modify the signatures for the pre-defined functions in these classes. If you do this, then it will break the test code that we will use to grade your assignment you end up getting no credit for the project. If a class already contains certain member variables, you should <strong>not</strong> remove them. But you may add private helper functions/member variables to these classes in order to correctly realize the functionality.</p>
+<p>The correctness of B+Tree index depends on the correctness of your implementation of buffer pool, we will <strong>not</strong> provide solutions for the previous programming projects. Since the first checkpoint is closely related to the second checkpoint in which you will implement index crabbing within existing B+ index, we have passed in a pointer parameter called <code>transaction</code> with default value <code>nullptr</code>. You can safely ignore the parameter for Checkpoint #1; you do not need to change or call any functions relate to the parameter until <a href="#concurrent_index"><b>Task #4</b></a>. </p>
+<!-- ========================================================================= -->
+
+<!-- CHECKPOINT #1                                                             -->
+
+<!-- ========================================================================= -->
+
+<h1 id="checkpoint1">Checkpoint #1</h1>
+
+<h2 id="b+tree-pages">Task #1 - B+Tree Pages</h2>
+
+<p>You need to implement three Page classes to store the data of your B+Tree tree.</p>
+<ul class="default">
+    <li> <a href="#b+tree-page"><b>B+Tree Parent Page</b></a>
+    <li> <a href="#b+tree-internal-page"><b>B+Tree Internal Page</b></a>
+    <li> <a href="#b+tree-leaf-page"><b>B+Tree Leaf Page</b></a>
+</ul>
+
+<!-- **************************************************** -->
+
+<!-- B+Tree Page(basic page)                              -->
+
+<!-- **************************************************** -->
+
+<h3 id="btree-page">B+Tree Parent Page</h3>
+
+<p>This is the parent class that both the Internal Page and Leaf Page inherited from and it only contains information that both child classes share. The Parent Page is divided into several fields as shown by the table below.</p>
+<p><b>B+Tree Parent Page Content</b>
+<table class="table table-striped">
+<thead>
+    <tr>
+        <th>Variable Name</th>
+        <th>Size</th>
+        <th>Description</th>
+    </tr>
+</thead>
+<tbody>
+        <tr id="row1">
+            <td>page_type_</td>
+            <td>4</td>
+            <td>Page Type (internal or leaf)</td>
+        </tr>
+        <tr id="row2">
+            <td>lsn_</td>
+            <td>4</td>
+            <td>Log sequence number (Used in Project 4)</td>
+        </tr>
+        <tr id="row3">
+            <td>size_</td>
+            <td>4</td>
+            <td>Number of Key &amp; Value pairs in page</td>
+        </tr>
+        <tr id="row4">
+            <td>max_size_</td>
+            <td>4</td>
+            <td>Max number of Key &amp; Value pairs in page</td>
+        </tr>
+        <tr id="row5">
+            <td>parent_page_id_</td>
+            <td>4</td>
+            <td>Parent Page Id</td>
+        </tr>
+        <tr id="row6">
+            <td>page_id_</td>
+            <td>4</td>
+            <td>Self Page Id</td>
+        </tr>
+</tbody>
+</table></p>
+<p>You must implement your Parent Page in the designated files. You are only allowed to modify the header file (<tt class="filepath">src/include/storage/page/b_plus_tree_page.h</tt>) and its corresponding source file (<tt class="filepath">src/page/b_plus_tree_page.cpp</tt>).</p>
+<!-- **************************************************** -->
+
+<!-- B+Tree Internal Page                                 -->
+
+<!-- **************************************************** -->
+
+<h3 id="b+tree-internal-page">B+Tree Internal Page</h3>
+
+<p>Internal Page does not store any real data, but instead it stores an ordered <b>m</b> key entries and <b>m+1</b> child pointers (a.k.a page_id). Since the number of pointer does not equal to the number of key, the first key is set to be invalid, and lookup methods should always start with the second key. At any time, each internal page is at least half full. During deletion, two half-full pages can be joined to make a legal one or can be redistributed to avoid merging, while during insertion one full page can be split into two.</p>
+<p>You must implement your Internal Page in the designated files. You are only allowed to modify the header file (<tt class="filepath">src/include/storage/page/b_plus_tree_internal_page.h</tt>) and its corresponding source file (<tt class="filepath">src/page/b_plus_tree_internal_page.cpp</tt>).</p>
+<!-- **************************************************** -->
+
+<!-- B+Tree Leaf Page                                     -->
+
+<!-- **************************************************** -->
+
+<h3 id="b+tree-leaf-page">B+Tree Leaf Page</h3>
+
+<p>The Leaf Page stores an ordered <b>m</b> key entries and <b>m</b> value entries. In your implementation, value should only be 64-bit record_id that is used to locate where actual tuples are stored, see <code>RID</code> class defined under in <tt class="filepath">src/include/common/rid.h</tt>. Leaf pages have the same restriction on the number of key/value pairs as Internal pages, and should follow the same operations of merge, redistribute and split.</p>
+<p>You must implement your Internal Page in the designated files. You are only allowed to modify the header file (<tt class="filepath">src/include/storage/page/b_plus_tree_leaf_page.h</tt>) and its corresponding source file (<tt class="filepath">src/storage/page/b_plus_tree_leaf_page.cpp</tt>).</p>
+<p><b>Important:</b>Even though the Leaf Pages and Internal Pages contain the same type of key, they may have distinct type of value, thus the <code>max_size</code> of leaf and internal pages could be different. </p>
+<p>Each B+Tree leaf/internal page corresponds to the content (i.e., the <code>data_</code> part) of a memory page fetched by buffer pool. So every time you try to read or write a leaf/internal page, you need to first <strong>fetch</strong> the page from buffer pool using its unique <code>page_id</code>, then
+<a onclick="javascript:pageTracker._trackPageview('/outgoing/en.cppreference.com');" href="http://en.cppreference.com/w/cpp/language/reinterpret_cast">reinterpret cast </a>to either a leaf or an internal page, and unpin the page after any writing or reading operations.</p>
+<!-- **************************************************** -->
+
+<!-- B+Tree Data structure                                -->
+
+<!-- **************************************************** -->
+
+<h2 id="b+tree-structure-1">Task #2.a - B+Tree Data Structure (Insertion & Point Search)</h2>
+
+<p>Your B+Tree Index could only support <b>unique key</b>. That is to say, when you try to insert a key-value pair with duplicate key into the index, it should not perform the insertion and return false.</p>
+<p>For Checkpoint #1, your B+Tree Index is only required to support <b>insertions</b> (<code>Insert</code>) and <b>point search</b> (<code>GetValue</code>). You do <b>NOT</b> needs to implement deletions for Checkpoint #1. However, you should correctly perform split if insertion triggers current number of key/value pairs after insertion equals to <code>max_size</code>. Since any write operation could lead to the change of <code>root_page_id</code> in B+Tree index, it is your responsibility to update <code>root_page_id</code> in the header page (<tt class="filepath">src/include/storage/page/header_page.h</tt>) to ensure that the index is durable on disk. Within the <code>BPlusTree</code> class, we have already implemented a function called <code>UpdateRootPageId</code> for you; all you need to do is invoke this function whenever the <code>root_page_id</code> of B+Tree index changes.</p>
+<p>Your B+Tree implementation must hide the details of the key/value type and associated comparator, like this:
+<pre>
+template &#60;typename KeyType,
+          typename ValueType,
+          typename KeyComparator&#62;
+class BPlusTree{
+   // ---
+};
+</pre></p>
+<p>These classes are already implemented for you:</p>
+<ul class="default">
+    <li><code>KeyType</code>:
+    The type of each key in the index. This will only be <code>GenericKey</code>, the actual size of <code>GenericKey</code> is specified and instantiated with a template argument and depends on the data type of indexed attribute.
+
+    <li><code>ValueType</code>:
+    The type of each value in the index. This will only be 64-bit RID.
+
+    <li><code>KeyComparator</code>:
+    The class used to compare whether two <code>KeyType</code> instances are less/greater-than each other. These will be included in the <code>KeyType</code> implementation files.
+</ul>
+
+<!-- ========================================================================= -->
+
+<!-- CHECKPOINT #2                                                             -->
+
+<!-- ========================================================================= -->
+
+<h1 id="checkpoint2">Checkpoint #2</h1>
+
+<!-- **************************************************** -->
+
+<!-- B+Tree Data Structures                               -->
+
+<!-- **************************************************** -->
+
+<h2 id="b+tree-structure-2">Task #2.b - B+Tree Data Structure (Deletion)</h2>
+
+<p>Your B+Tree Index is required to support deletions. Your B+Tree Index should correctly perform merge or redistribute if deletion cause certain page to go below the occupancy threshold. Again, your B+Tree Index could only support unique key and you should follow the same guidelines in <a href="#b+tree-structure-1"><b>Task #2.a </b></a>.</p>
+<h2 id="index-iterator">Task #3 - Index Iterator</h2>
+
+<p>You will build a general purpose index iterator to retrieve all the leaf pages efficiently. The basic idea is to organize them into a single linked list, and then traverse every key/value pairs in specific direction stored within the B+Tree leaf pages. Your index iterator should follow the functionality of
+<a onclick="javascript:pageTracker._trackPageview('/outgoing/www.cplusplus.com');" href="http://www.cplusplus.com/reference/iterator/">Iterator</a> defined in C++17, including the ability to iterate through a range of elements using a set of operators, and for-each loop (with at least the increment, dereference, equal and not-equal operators). Note that in order to support for-each loop function for your index, your <code>BPlusTree</code> should correctly implements <code>begin()</code> and <code>end()</code>.</p>
+<p>You must implement your index iterator in the designated files. You are only allowed to modify the header file (<tt class="filepath">src/include/storage/index/index_iterator.h</tt>) and its corresponding source file (<tt class="filepath">src/index/storage/index_iterator.cpp</tt>). You do not need to modify any other files. You <strong>must</strong> implement the following functions in the <code>IndexIterator</code> class found in these files. In the implementation of index iterator, you are allowed to add any helper methods as long as you have those three methods below.</p>
+<ul class="default">
+    <li><code>isEnd()</code>:
+    Return whether this iterator is pointing at the last key/value pair.
+
+    <li><code>operator++()</code>:
+    Move to the next key/value pair.
+
+    <li><code>operator*()</code>:
+    Return the key/value pair this iterator is currently pointing at.
+
+    <li><code>operator==()</code>:
+    Return whether two iterators are equal
+
+    <li><code>operator!=()</code>:
+    Return whether two iterators are not equal.
+</ul>
+
+<!-- **************************************************** -->
+
+<!-- Concurrent Index                                     -->
+
+<!-- **************************************************** -->
+
+<h2 id="concurrent_index">Task #4 - Concurrent Index</h2>
+
+<p>In this part, you need to update your original single-threaded B+Tree index so that it can support concurrent operations. We will use the latch crabbing technique described in class and in the textbook. The thread traversing the index will acquire then release latches on B+Tree pages. A thread can <strong>only</strong> release latch on a parent page if its child page considered "safe". Note that the definition of "safe" can vary based on what kind of operation the thread is executing:</p>
+<ul class="default">
+    <li><code>Search</code>:
+    Starting with root page, grab read (<b>R</b>) latch on child
+    Then release latch on parent as soon as you land on the child page.
+
+    <li><code>Insert</code>:
+    Starting with root page, grab write (<b>W</b>) latch on child.
+    Once child is locked, check if it is safe, in this case, not full. If child is safe, release <b>all</b> locks on ancestors.
+
+    <li><code>Delete</code>:
+    Starting with root page, grab write (<b>W</b>) latch on child.
+    Once child is locked, check if it is safe, in this case, at least half-full. (NOTE: for root page, we need to check with different standards) If child is safe, release <b>all</b> locks on ancestors.
+</ul>
+
+<p><b>Important:</b>The write up only describe the basic concepts behind latch crabbing, before you start your implementation, please consult with lecture and textbook Chapter 15.10.</p>
+<h3>REQUIREMENTS AND HINTS</h3>
+
+<ul class="default">
+    <li>You are <u><b>not</b></u> allowed to use a global scope latch to protect your data structure. In other words, you may not lock the whole index and only unlock the latch when operations are done. We will check grammatically and manually to make sure you are doing the latch crabbing in the right way.
+
+    <li>We have provided the implementation of read-write latch (<tt class="filepath">src/include/common/rwlatch.h</tt>). And have already added helper functions under page header file to acquire and release latch (<tt class="filepath">src/include/storage/page/page.h</tt>).
+
+    <li>We will not add any <b>mandatory</b> interfaces in the B+Tree index. You can write any private/helper functions in your implementation as long as you keep all the original public interfaces intact for test purpose.
+
+    <li>For this task, you have to use the passed in pointer parameter called <code>transaction</code> (<tt class="filepath">src/include/concurrency/transaction.h</tt>). It provides methods to store the page on which you have acquired latch while traversing through B+ tree and also methods to store the page which you have deleted during <code>Remove</code> operation. Our suggestion is to look closely at the <code>FindLeafPage</code> method within B+ tree, you may wanna modify your previous implementation (note that you may need to change to <b>return value</b> for this method) and then add the logic of latch crabbing within this particular method.
+
+    <li>The return value for FetchPage() in buffer pool manager is a pointer that points to a Page instance (<tt class="filepath">src/include/storage/page/page.h</tt>). You can grab a latch on <code>Page</code>, but you cannot grab a latch on B+Tree node (neither internal node nor leaf node).
+</ul>
+
+<h3>COMMON PITFALLS</h3>
+
+<ul class="default">
+    <li>You are NOT tested for thread-safe scans in this project (no concurrent iterator operations will be tested). However, a correct implementation would requires the Leaf Page to throw an <code>std::exception</code> when it cannot acquire a latch on its sibling to avoid potential dead-locks.
+
+    <li>Think carefully about the order and relationship between <code>UnpinPage(page_id, is_dirty)</code> method from buffer pool manager class and <code>UnLock()</code> methods from page class. You have to release the latch on that page <b>BEFORE</b> you unpin the same page from the buffer pool.
+
+    <li>If you are implementing concurrent B+tree index correctly, then every thread will <b>ALWAYS</b> acquire latch from root to bottom. When you release the latch, make sure you follow the same order (a.k.a from root to bottom) to avoid possible deadlock situation.
+
+    <li>One of the corner case is that when insert and delete, the member variable <b>root_page_id</b> (<tt class="filepath">src/include/storage/index/b_plus_tree.h</tt>) will also be updated. It is your responsibility to protect from concurrent update of this shared variable(hint: add an abstract layer in B+ tree index, you can use <code>std::mutex</code> to protect this variable)
+</ul>
+
+<!-- ========================================================================= -->
+
+<!-- INSTRUCTIONS                                                              -->
+
+<!-- ========================================================================= -->
+
+<h1>Instructions</h1>
+<h2>Setting Up Your Development Environment</h2>
+<p>See the <a href="../project0/#instructions">Project #0 instructions</a> on how to create your private repository and setup your development environment.</p>
+<p class="warning bg-info">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    You must pull the latest changes on our BusTub repo for test files and other supplementary files we have provided for you. Run `git pull`. 
+</p>
+
+<h3>Checkpoint 1</h3>
+<p>Update your project source code like you did in Project 1</p>
+<p class="warning bg-info">
+    <i class="trigger fa fa-question-circle fa-lg"></i>
+    Be sure to include your Project 1 code into the submission.
+</p>
+
+<p>Replace the following files in the Project 2 repository with your implementations:
+<ul class="default">
+    <li> <tt class="filepath">src/include/buffer/lru_replacer.h</tt>
+    <li> <tt class="filepath">src/buffer/lru_replacer.cpp</tt>
+    <li> <tt class="filepath">src/include/buffer/buffer_pool_manager.h</tt>
+    <li> <tt class="filepath">src/buffer/buffer_pool_manager.cpp</tt>
+</ul></p>
+<p>Make sure you are getting the correct splitting behaviour by checking your solution with <code>b_plus_tree_print_test</code> </p>
+<p>You are <u>not</u> required to pass the below tests for <a href="#checkpoint1">Checkpoint #1</a>:
+<ul class="default">
+    <li> <tt class="filepath">test/index/b_plus_tree_insert_test.cpp</tt>
+    <li> <tt class="filepath">test/index/b_plus_tree_delete_test.cpp</tt>
+    <li> <tt class="filepath">test/index/b_plus_tree_concurrent_test.cpp</tt>
+</ul></p>
+<h3>Checkpoint 2</h3>
+<p>You will need to pass the below tests for <a href="#checkpoint2">Checkpoint #2</a>:</p>
+<ul class="default">
+    <li> <tt class="filepath">test/index/b_plus_tree_insert_test.cpp</tt>
+    <li> <tt class="filepath">test/index/b_plus_tree_delete_test.cpp</tt>
+    <li> <tt class="filepath">test/index/b_plus_tree_concurrent_test.cpp</tt>
+</ul>
+
+<h2>Testing</h2>
+<p>You can test the individual components of this assigment using our testing framework. We use <a onclick="javascript:pageTracker._trackPageview('/outgoing/github.com');" href="https://github.com/google/googletest">GTest</a> for unit test cases.
+In the <code>test/index/b_plus_tree_print_test</code>, you can print out the internal data structure of your b+ tree index, it's an intuitive way to track and find early mistakes. </p>
+<pre>
+cd build
+make b_plus_tree_print_test
+./test/b_plus_tree_print_test
+</pre>
+
+<p class="warning bg-info">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    Remember to <b>ENABLE</b> the test when running the print test.
+</p>
+
+<p class="warning bg-info">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    Remember to <b>DISABLE</b> the test when running other tests with <code>make check-tests</code>.
+</p>
+
+<h3>Tree Visualization</h3>
+<p>Use the <code>b_plus_tree_print_test</code> to generate a dot file after constructing a tree:</p>
+<pre>
+$ ./b_plus_tree_print_test 
+>> ... USAGE ...
+>> 5 5 // set leaf node and internal node max size to be 5
+>> f input.txt // Insert into the tree with some inserts 
+>> g my-tree.dot // output the tree to dot format 
+>> q // Quit the test (Or use another terminal) 
+</pre>
+
+<p>You should now have a <code>my-tree.dot</code> file with the <a onclick="javascript:pageTracker._trackPageview('/outgoing/en.wikipedia.org');" href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">DOT</a> file format in the same directory as your test binary, you can then visualize it through either a command line visiualizer or an online visualizer: </p>
+<ol class="default">
+    <li> Dump the content to <a onclick="javascript:pageTracker._trackPageview('/outgoing/dreampuf.github.io');" href="http://dreampuf.github.io/GraphvizOnline/">http://dreampuf.github.io/GraphvizOnline/</a>.
+    <li> Or download a command line tool at https://graphviz.org/download/ on your platform. 
+    <li> Draw the tree with <code>dot -Tpng -O my-tree.dot</code>, a PNG file will be generated.
+</ol>
+
+<p>Consider the following example generated with GraphvizOnline:</p>
+<p><img src="../files/project2-tree.png" /></p>
+<ul class="default">
+    <li> The first row <code>P=?</code> tells you the page id of the tree page.
+    <li> Pink is an internal node, Green is leaf node.
+    <li> The second row prints out the properties.
+    <li> The third row prints out keys, and pointers from internal node to the leaf node is constructed from internal node's value.
+    <li> Note that the first box of the internal node is empty. This is <u>not</u> a bug.
+</ul>
+
+<h3>Memory safety</h3>
+<p>To ensure your implementation does not have memory leak, you can run the test with <a onclick="javascript:pageTracker._trackPageview('/outgoing/valgrind.org');" href="http://valgrind.org/">Valgrind</a>.</p>
+<pre>
+cd build
+make b_plus_tree_insert_test
+valgrind --trace-children=yes \
+   --leak-check=full \
+   --track-origins=yes \
+   --soname-synonyms=somalloc=*jemalloc* \
+   --error-exitcode=1 \
+   --suppressions=../build_support/valgrind.supp \
+   ./test/b_plus_tree_insert_test
+</pre>
+
+<p><b>Important:</b> These tests are only a subset of the all the tests that we will use to evaluate and grade your project. You should write additional test cases on your own to check the complete functionality of your implementation.</p>
+<h2>Development Hints</h2>
+<p>Instead of using <code>printf</code> statements for debugging, use the <code>LOG_*</code> macros for logging information like this:
+<pre>
+LOG_DEBUG("Fetching page %d", page_id);
+</pre></p>
+<p>To enable logging in your project, you will need to reconfigure it like this:
+<pre>
+cd build
+cmake -DCMAKE_BUILD_TYPE=DEBUG ..
+make
+</pre></p>
+<p>The different logging levels are defined in <tt class="filepath">src/include/common/logger.h</tt>. After enabling logging, the logging level defaults to <code>LOG_LEVEL_INFO</code>. Any logging method with a level that is equal to or higher than <code>LOG_LEVEL_INFO</code> (e.g., <code>LOG_INFO</code>, <code>LOG_WARN</code>, <code>LOG_ERROR</code>) will emit logging information.</p>
+<p>Using <a onclick="javascript:pageTracker._trackPageview('/outgoing/www.cplusplus.com');" href="http://www.cplusplus.com/reference/cassert/assert/">assert </a>to force check the correctness of your index implementation. For example, when you try to delete a page, the <code>page_count</code> must equals to 0.</p>
+<p>Using a relatively small value of page size at the beginning test stage, it would be easier for you to check whether you have done the delete and insert in the correct way. You can change the page size in configuration file (<tt class="filepath">src/include/common/config.h</tt>).</p>
+<p class="warning bg-info">
+    <i class="trigger fa fa-question-circle fa-lg"></i>
+    Post all of your questions about this project on Piazza.
+    Do <u><b>not</b></u> email the TAs directly with questions.
+</p>
+
+<!-- ========================================================================= -->
+
+<!-- GRADING RUBRIC                                                            -->
+
+<!-- ========================================================================= -->
+
+<h1>Grading Rubric</h1>
+<p>Each project submission will be graded based on the following criteria:</p>
+<ol>
+<li>Does the submission successfully execute all of the test cases and produce the correct answer?</li>
+<li>Does the submission execute without any memory leaks?</li>
+</ol>
+<p>Note that we will use additional test cases that are more complex and go beyond the sample test cases that we provide you.</p>
+<!-- ========================================================================= -->
+
+<!-- LATE POLICY                                                               -->
+
+<!-- ========================================================================= -->
+
+<h1>Late Policy</h1>
+<p>See the <a href="#late-policy">late policy</a> in the syllabus.</p>
+<!-- ========================================================================= -->
+
+<!-- SUBMISSION                                                                -->
+
+<!-- ========================================================================= -->
+
+<h1 id="submission">Submission</h1>
+
+<p>After completing the assignment, you can submit your implementation of to Gradescope. Since we have two checkpoints for this project, you will need to submit them separately through the following link.</p>
+<ul>
+<li><a onclick="javascript:pageTracker._trackPageview('/outgoing/www.gradescope.com');" href="https://www.gradescope.com/courses/163907/">https://www.gradescope.com/courses/163907/</a></li>
+</ul>
+<p>You only need to include the following files:
+<h3>Checkpoint #1</h3>
+<ul class="default">
+    <li> Every file for Project 1 (4 in total)
+    <li> <tt class="filepath">src/include/storage/page/b_plus_tree_page.h</tt>
+    <li> <tt class="filepath">src/storage/page/b_plus_tree_page.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/page/b_plus_tree_internal_page.h</tt>
+    <li> <tt class="filepath">src/storage/page/b_plus_tree_internal_page.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/page/b_plus_tree_leaf_page.h</tt>
+    <li> <tt class="filepath">src/storage/page/b_plus_tree_leaf_page.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/index/b_plus_tree.h</tt>
+    <li> <tt class="filepath">src/storage/index/b_plus_tree.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/index/index_iterator.h</tt>
+    <li> <tt class="filepath">src/storage/index/index_iterator.cpp</tt>
+</ul></p>
+<h3>Checkpoint#2</h3>
+
+<ul class="default">
+    <li> Every file for Project 1 (4 in total)
+    <li> <tt class="filepath">src/include/storage/page/b_plus_tree_page.h</tt>
+    <li> <tt class="filepath">src/storage/page/b_plus_tree_page.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/page/b_plus_tree_internal_page.h</tt>
+    <li> <tt class="filepath">src/storage/page/b_plus_tree_internal_page.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/page/b_plus_tree_leaf_page.h</tt>
+    <li> <tt class="filepath">src/storage/page/b_plus_tree_leaf_page.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/index/b_plus_tree.h</tt>
+    <li> <tt class="filepath">src/storage/index/b_plus_tree.cpp</tt>
+    <li> <tt class="filepath">src/include/storage/index/index_iterator.h</tt>
+    <li> <tt class="filepath">src/storage/index/index_iterator.cpp</tt>
+</ul>
+
+<p>You can submit your answers as many times as you like and get immediate feedback. Your score will be sent via email to your Andrew account within a few minutes after your submission.</p>
+<!-- ========================================================================= -->
+
+<!-- COLLABORATION POLICY                                                      -->
+
+<!-- ========================================================================= -->
+
+<h1>Collaboration Policy</h1>
+<ul>
+<li>Every student has to work individually on this assignment.</li>
+<li>Students are allowed to discuss high-level details about the project with others.</li>
+<li>Students are <strong>not</strong> allowed to copy the contents of a white-board after a group meeting with other students.</li>
+<li>Students are <strong>not</strong> allowed to copy the solutions from another colleague.</li>
+</ul>
+<p class="warning bg-danger">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    <b>WARNING:</b> All of the code for this project must be your own. You may not copy source code from other students or other sources that you find on the web. Plagiarism <b>will not</b> be tolerated. See CMU's <a onclick="javascript:pageTracker._trackPageview('/outgoing/www.cmu.edu');" href="https://www.cmu.edu/policies/student-and-student-life/academic-integrity.html">Policy on Academic Integrity</a> for additional information.
+</p></p>
+                <div class="published">
+                    <time datetime="2020-11-01 11:12:42.279120-05:00"> <B>Last Updated:</B> Nov 01, 2020</time>
+                </div>
+            </section>
+        </div>
+    </section>
+</article>
+
+<!-- Footer -->
+<footer id="footer">
+
+    <ul class="icons">
+    </ul>
+    
+    <span class="copyright">
+    <a onclick="javascript:pageTracker._trackPageview('/outgoing/db.cs.cmu.edu');" href="https://db.cs.cmu.edu" title="Carnegie Mellon Database Group" class="image-link"><img src="../images/cmu-db-group.svg" class="cmudb-logo" /></a>
+    </span>
+
+</footer>    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-4067813-24"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    
+    gtag('config', 'UA-4067813-24');
+    </script>
+    <!-- End Google Analytics Code -->
+
+    <!-- Fix scrolling issues to internal HREFs that get positioned behind navbar -->
+    <!-- http://stackoverflow.com/questions/10732690/offsetting-an-html-anchor-to-adjust-for-fixed-header -->
+    <script src="../theme/js/href_scroll.js"></script>
+    
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:og="https://ogp.me/ns#"
+      xmlns:fb="https://www.facebook.com/2008/fbml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    
+        <meta name="author" content="Andy Pavlo" />
+        <meta name="description" content="Do not post your project on a public Github repository. Overview During the semester, you will be building a new disk-oriented storage manager for the BusTub DBMS. Such a storage manager assumes that the primary storage location of the database is on disk. The first programming project is to implement a buffer pool in your storage manager. The buffer pool is responsible for moving physical pages back and forth from main memory to disk. It allows a DBMS to support databases that are larger than the amount of memory that is available to the system. The buffer pool&#39;s operations are …" />
+    
+    <meta name="keywords" content="" />
+    <!--[if lte IE 8]><script src="../css/ie/html5shiv.js"></script><![endif]-->
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery.dropotron.min.js"></script>
+    <script src="../js/skel.min.js"></script>
+    <script src="../js/skel-layers.min.js"></script>
+    <script src="../js/init.js"></script>
+    <link rel="stylesheet" href="../css/pygment.css" />
+    <noscript>
+        <link rel="stylesheet" href="../css/skel.css" />
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/style-noscript.css" />
+    </noscript>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link  href="//fonts.googleapis.com/css?family=Anonymous+Pro:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css" >
+    <!--[if lte IE 8]><link rel="stylesheet" href="/css/ie/v8.css" /><![endif]-->
+    <!--[if lte IE 9]><link rel="stylesheet" href="/css/ie/v9.css" /><![endif]-->
+    
+    
+    <meta property="og:site_name" content="CMU 15-445/645" />
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="Project #1 - Buffer Pool - CMU 15-445/645 :: Intro to Database Systems (Fall 2020)"/>
+    <meta property="og:url" content="../project1/index.html"/>
+    <meta property="article:published_time" content="2020-11-01" />
+    <meta property="og:description" content="Do not post your project on a public Github repository. Overview During the semester, you will be building a new disk-oriented storage manager for the BusTub DBMS. Such a storage manager assumes that the primary storage location of the database is on disk. The first programming project is to implement a buffer pool in your storage manager. The buffer pool is responsible for moving physical pages back and forth from main memory to disk. It allows a DBMS to support databases that are larger than the amount of memory that is available to the system. The buffer pool&#39;s operations are …" />
+        <meta property="og:image"
+              content="https://15445.courses.cs.cmu.edu/fall2020/images/twitter-card.jpg"/>
+
+    <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@CMUDB">
+        <meta name="twitter:creator" content="@CMUDB">
+    <meta name="twitter:domain" content="..">
+            <meta property="twitter:image"
+                  content="https://15445.courses.cs.cmu.edu/fall2020/images/twitter-card.jpg"/>
+    
+    
+    <link href="https://db.cs.cmu.edu/favicon.png" rel="icon">
+
+    <title>Project #1 - Buffer Pool | CMU 15-445/645 :: Intro to Database Systems (Fall 2020) </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width">
+</head>
+
+<body class="">
+
+    <!-- Header -->
+    <header id="header" >
+        <h1 class="logo">
+            <a href="..">CMU 15-445/645</a>
+        </h1>
+        <nav id="nav">
+            <ul>
+                <li ><a href="..">Home</a></li>
+                            <li><a href="../assignments.html">Assignments</a>
+                            <li><a href="../faq.html">FAQ</a>
+                            <li><a href="../schedule.html">Schedule</a>
+                            <li><a href="../syllabus.html">Syllabus</a>
+                <!--
+                <li class="submenu">
+                    <a href="../">Blog</a>
+                    <ul>
+                    </ul>
+                </li>
+                -->
+                <li> <a title="Piazza" href="https://piazza.com/cmu/fall2020/15445645/" target="_new"><i class="fa fa-comments-o"></i> Piazza</a>
+                
+                <li><a href="#" class="dropdown-toggle" data-toggle="dropdown"  data-hover="dropdown" data-delay="1000" data-close-others="true"> <i class="fa fa-book"></i> Archives <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2019/" target="_new">Fall 2019</a></li>
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2018/" target="_new">Fall 2018</a></li>
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2017/" target="_new">Fall 2017</a></li>
+                </ul></li>
+            </ul>
+        </nav>
+    </header>
+
+<!-- Main -->
+<article id="main">
+
+    <header class="special container">
+        <span class="icon fa-database"></span>
+        <h2>Project #1 - Buffer Pool</h2>
+    </header>
+
+    <section class="wrapper style4 container">
+  
+        <!-- Content -->
+        <div class="content">
+            <section>
+                <p><p class="warning bg-fatal">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    Do <u>not</u> post your project on a public Github repository.
+</p>
+
+<!-- ========================================================================= -->
+
+<!-- OVERVIEW                                                                  -->
+
+<!-- ========================================================================= -->
+
+<h1>Overview</h1>
+<p>During the semester, you will be building a new disk-oriented storage manager for the <a onclick="javascript:pageTracker._trackPageview('/outgoing/github.com');" href="https://github.com/cmu-db/bustub">BusTub</a> DBMS. Such a storage manager assumes that the primary storage location of the database is on disk.</p>
+<p>The first programming project is to implement a <strong>buffer pool</strong> in your storage manager. The buffer pool is responsible for moving physical pages back and forth from main memory to disk. It allows a DBMS to support databases that are larger than the amount of memory that is available to the system. The buffer pool's operations are transparent to other parts in the system. For example, the system asks the buffer pool for a page using its unique identifier (<code>page_id_t</code>) and it does not know whether that page is already in memory or whether the system has to go retrieve it from disk.</p>
+<p><strong>Your implementation will need to be thread-safe</strong>. Multiple threads will be accessing the internal data structures at the same and thus you need to make sure that their critical sections are protected with <a onclick="javascript:pageTracker._trackPageview('/outgoing/stackoverflow.com');" href="https://stackoverflow.com/a/42464336">latches</a> (these are called "locks" in operating systems).</p>
+<p>You will need to implement the following two components in your storage manager:</p>
+<ul class="default">
+    <li> <a href="#replacer"><b>LRU Replacement Policy</b></a> </li>
+    <li> <a href="#buffer-pool"><b>Buffer Pool Manager</b></a> </li>
+</ul>
+
+<p>This is a single-person project that will be completed individually (i.e. no groups).</p>
+<!-- START project1 -->
+
+<!-- AUTO-GENERATED BY GENERATE-SCHEDULE SCRIPT -->
+
+<!-- ANY MODIFICATIONS WILL BE OVERWRITTEN -->
+
+<ul>
+<li><b>Release Date:</b> Sep 14, 2020</li>
+<li><b>Due Date:</b> Sep 27, 2020 @ 11:59pm
+<!-- END project1 --></li>
+</ul>
+<!-- ========================================================================= -->
+
+<!-- PROJECT SPECIFICATION                                                     -->
+
+<!-- ========================================================================= -->
+
+<h1>Project Specification</h1>
+<p>For each of the following components, we are providing you with stub classes that contain the API that you need to implement. You <strong>should not</strong> modify the signatures for the pre-defined functions in these classes. If you modify the signatures, the test code that we use for grading will break and you will get no credit for the project. You also <strong>should not</strong> add additional classes in the source code for these components. These components should be entirely self-contained.</p>
+<p>If a class already contains data members, you should <strong>not</strong> remove them. For example, the <code>BufferPoolManager</code> contains <code>DiskManager</code> and <code>Replacer</code> objects. These are required to implement the functionality that is needed by the rest of the system. On the other hand, you may need to add data members to these classes in order to correctly implement the required functionality.  You can also add additional helper functions to these classes. The choice is yours.</p>
+<p>You are allowed to use any built-in <a onclick="javascript:pageTracker._trackPageview('/outgoing/en.cppreference.com');" href="http://en.cppreference.com/w/cpp/container">C++17 containers</a> in your project unless specified otherwise. It is up to you to decide which ones you want to use. Note that these containers are not thread-safe and that you will need to include latches in your implementation to protect them. You may not bring in additional third-party dependencies (e.g. boost).</p>
+<!-- **************************************************** -->
+
+<!-- LRU Replacement Policy                             -->
+
+<!-- **************************************************** -->
+
+<h2 id="replacer">Task #1 - LRU Replacement Policy</h2>
+
+<p>This component is responsible for tracking page usage in the buffer pool. You will implement a new sub-class called  <code>LRUReplacer</code> in <tt class="filepath">src/include/buffer/lru_replacer.h</tt> and its corresponding implementation file in <tt class="filepath">src/buffer/lru_replacer.cpp</tt>. <code>LRUReplacer</code> extends the abstract <code>Replacer</code> class (<tt class="fliepath">src/include/buffer/replacer.h</tt>), which contains the function specifications.</p>
+<p>The size of the <code>LRUReplacer</code> is the same as buffer pool since it contains placeholders for all of the frames in the <code>BufferPoolManager</code>. However, not all the frames are considered as in the <code>LRUReplacer</code>. The <code>LRUReplacer</code> is initialized to have no frame in it. Then, only the newly unpinned ones will be considered in the <code>LRUReplacer</code>. </p>
+<p>You will need to implement the <em>LRU</em> policy discussed in the class. You will need to implement the following methods:</p>
+<ul class="default">
+    <li> <code>Victim(T*)</code> : Remove the object that was accessed the least recently compared to all the elements being tracked by the <code>Replacer</code>, store its contents in the output parameter and return <code>True</code>. If the <code>Replacer</code> is empty return <code>False</code>.  </li>
+    <li> <code>Pin(T)</code> : This method should be called after a page is pinned to a frame in the <code>BufferPoolManager</code>. It should remove the frame containing the pinned page from the <code>LRUReplacer</code>. </li>
+    <li> <code>Unpin(T)</code> : This method should be called when the <code>pin_count</code> of a page becomes 0. This method should add the frame containing the unpinned page to the <code>LRUReplacer</code>. </li>
+    <li> <code>Size()</code> : This method returns the number of frames that are currently in the <code>LRUReplacer</code>. </li>
+</ul>
+
+<p>The implementation details are up to you. You are allowed to use built-in STL containers. You can assume that you will not run out of memory, but you must make sure that the operations are thread-safe.</p>
+<!-- **************************************************** -->
+
+<!-- Buffer Pool Manager                                  -->
+
+<!-- **************************************************** -->
+
+<h2 id="buffer-pool">Task #2 - Buffer Pool Manager</h2>
+
+<p>Next, you need to implement the buffer pool manager in your system (<code>BufferPoolManager</code>). The <code>BufferPoolManager</code> is responsible for fetching database pages from the <code>DiskManager</code> and storing them in memory. The <code>BufferPoolManager</code> can also write dirty pages out to disk when it is either explicitly instructed to do so or when it needs to evict a page to make space for a new page.</p>
+<p>To make sure that your implementation works correctly with the rest of the system, we will provide you with some of the functions already filled in. You will also not need to implement the code that actually reads and writes data to disk (this is called the <code>DiskManager</code> in our implementation). We will provide that functionality for you.</p>
+<p>All in-memory pages in the system are represented by <code>Page</code> objects. The <code>BufferPoolManager</code> does not need to understand the contents of these pages. But it is important for you as the system developer to understand that <code>Page</code> objects are just containers for memory in the buffer pool and thus are not specific to a unique page. That is, each <code>Page</code> object contains a block of memory that the <code>DiskManager</code> will use as a location to copy the contents of a <strong>physical page</strong> that it reads from disk. The <code>BufferPoolManager</code> will reuse the same <code>Page</code> object to store data as it moves back and forth to disk. This means that the same <code>Page</code> object may contain a different physical page throughout the life of the system. The <code>Page</code> object's identifer (<code>page_id</code>) keeps track of what physical page it contains; if a <code>Page</code> object does not contain a physical page, then its <code>page_id</code> must be set to <code>INVALID_PAGE_ID</code>.</p>
+<p>Each <code>Page</code> object also maintains a counter for the number of threads that have "pinned" that page. Your <code>BufferPoolManager</code> is not allowed to free a <code>Page</code> that is pinned. Each <code>Page</code> object also keeps track of whether it is dirty or not. It is your job to record whether a page was modified before it is unpinned. Your <code>BufferPoolManager</code> must write the contents  of a dirty <code>Page</code> back to disk before that object can be reused.</p>
+<p>Your <code>BufferPoolManager</code> implementation will use the <code>LRUReplacer</code> class that you created in the previous steps of this assignment. It will use the <code>LRUReplacer</code> to keep track of when <code>Page</code> objects are accessed so that it can decide which one to evict when it must free a frame to make room for copying a new physical page from disk.</p>
+<p>You will need to implement the following functions defined in the header file (<tt class="filepath">src/include/buffer/buffer_pool_manager.h</tt>) in the source file (<tt class="filepath">src/buffer/buffer_pool_manager.cpp</tt>):</p>
+<ul class="default">
+    <li> <code>FetchPageImpl(page_id)</code> </li>
+    <li> <code>NewPageImpl(page_id)</code> </li>
+    <li> <code>UnpinPageImpl(page_id, is_dirty)</code> </li>
+    <li> <code>FlushPageImpl(page_id)</code> </li>
+    <li> <code>DeletePageImpl(page_id)</code> </li>
+    <li> <code>FlushAllPagesImpl()</code> </li>
+</ul>
+
+<p>For FetchPageImpl,you should return NULL if no page is available in the free list and all other pages are currently pinned. FlushPageImpl should flush a page regardless of its pin status.</p>
+<p>Refer to the function documentation for details on how to implement these functions. Don't touch the non-impl versions, we need those to grade your code.</p>
+<!-- ========================================================================= -->
+
+<!-- INSTRUCTIONS                                                              -->
+
+<!-- ========================================================================= -->
+
+<h1 id="instructions">Instructions</h1>
+
+<p>See the <a href="../project0/#instructions">Project #0 instructions</a> on how to create your private repository and setup your development environment.</p>
+<h2>Testing</h2>
+<p>You can test the individual components of this assigment using our testing framework. We use <a onclick="javascript:pageTracker._trackPageview('/outgoing/github.com');" href="https://github.com/google/googletest">GTest</a> for unit test cases. There are two separate files that contain tests for each component:</p>
+<ul class="default">
+    <li><code>LRUReplacer</code>: <tt class="filepath">test/buffer/lru_replacer_test.cpp</tt>
+    <li><code>BufferPoolManager</code>: <tt class="filepath">test/buffer/buffer_pool_manager_test.cpp</tt>
+</ul>
+
+<p>You can compile and run each test individually from the command-line:</p>
+<pre>
+$ mkdir build
+$ cd build
+$ make lru_replacer_test
+$ ./test/lru_replacer_test
+</pre>
+
+<p>You can also run <code>make check-tests</code> to run ALL of the test cases. Note that some tests are disabled as you have not implemented future projects. You can disable tests in GTest by adding a <code>DISABLED_</code> prefix to the test name.</p>
+<p><b>Important:</b> These tests are only a subset of the all the tests that we will use to evaluate and grade your project. You should write additional test cases on your own to check the complete functionality of your implementation.</p>
+<h2>Formatting</h2>
+<p>Your code must follow the <a onclick="javascript:pageTracker._trackPageview('/outgoing/google.github.io');" href="https://google.github.io/styleguide/cppguide.html">Google C++ Style Guide</a>. We use <a onclick="javascript:pageTracker._trackPageview('/outgoing/clang.llvm.org');" href="https://clang.llvm.org/">Clang</a> to automatically check the quality of your source code. Your project grade will be <u><b>zero</b></u> if your submission fails any of these checks.</p>
+<p>Execute the following commands to check your syntax. The <code>format</code> target will automatically correct your code. The <code>check-lint</code> and <code>check-clang-tidy</code> targets will print errors and instruct you how to fix it to conform to our style guide.</p>
+<pre>
+$ make format
+$ make check-lint
+$ make check-clang-tidy
+</pre>
+
+<h2>Development Hints</h2>
+<p>Instead of using <code>printf</code> statements for debugging, use the <code>LOG_*</code> macros for logging information like this:
+<pre>LOG_INFO("# Pages: %d", num_pages);
+LOG_DEBUG("Fetching page %d", page_id);</pre></p>
+<p>To enable logging in your project, you will need to reconfigure it like this:
+<pre>
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_BUILD_TYPE=DEBUG ..
+$ make</pre></p>
+<p>The different logging levels are defined in <tt class="filepath">src/include/common/logger.h</tt>. After enabling logging, the logging level defaults to <code>LOG_LEVEL_INFO</code>. Any logging method with a level that is equal to or higher than <code>LOG_LEVEL_INFO</code> (e.g., <code>LOG_INFO</code>, <code>LOG_WARN</code>, <code>LOG_ERROR</code>) will emit logging information. Note that you will need to add <code>#include "common/logger.h"</code> to any file that you want to use the logging infrastructure.</p>
+<p>We encourage you to use <code>gdb</code> to debug your project if you are having problems. </p>
+<p class="warning bg-info">
+    <i class="trigger fa fa-question-circle fa-lg"></i>
+    Post all of your questions about this project on Piazza.
+    Do <u><b>not</b></u> email the TAs directly with questions.
+</p>
+
+<!--<p class="warning bg-info">
+    <i class="trigger fa fa-question-circle fa-lg"></i>
+    The instructor and TAs will <b><u>not</u></b> teach you how to debug your code.
+</p>-->
+
+<!-- ========================================================================= -->
+
+<!-- GRADING RUBRIC                                                            -->
+
+<!-- ========================================================================= -->
+
+<h1 id="grading">Grading Rubric</h1>
+
+<p>Each project submission will be graded based on the following criteria:</p>
+<ol class="default">
+    <li> Does the submission successfully execute all of the test cases and produce the correct answer?
+    <li> Does the submission execute without any memory leaks?
+    <li> Does the submission follow the code formatting and style policies?
+</ol>
+
+<p>Note that we will use additional test cases to grade your submission that are more complex than the sample test cases that we provide you.</p>
+<!-- ========================================================================= -->
+
+<!-- LATE POLICY                                                               -->
+
+<!-- ========================================================================= -->
+
+<h1 id="submission">Late Policy</h1>
+
+<p>See the <a href="../syllabus.html#late-policy">late policy</a> in the syllabus.</p>
+<!-- ========================================================================= -->
+
+<!-- SUBMISSION                                                                -->
+
+<!-- ========================================================================= -->
+
+<h1 id="submission">Submission</h1>
+
+<p>After completing the assignment, you can submit your implementation to Gradescope:</p>
+<ul>
+<li><b><a onclick="javascript:pageTracker._trackPageview('/outgoing/www.gradescope.com');" href="https://www.gradescope.com/courses/163907/">https://www.gradescope.com/courses/163907/</a></b></li>
+</ul>
+<p>You only need to include the following files:</p>
+<ul class="default">
+    <li> <tt class="filepath">src/include/buffer/lru_replacer.h</tt>
+    <li> <tt class="filepath">src/buffer/lru_replacer.cpp</tt>
+    <li> <tt class="filepath">src/include/buffer/buffer_pool_manager.h</tt>
+    <li> <tt class="filepath">src/buffer/buffer_pool_manager.cpp</tt>
+</ul>
+
+<p>You can submit your answers as many times as you like and get immediate feedback.</p>
+<p class="warning bg-info">
+    <i class="trigger fa fa-question-circle fa-lg"></i>
+    CMU students should use the Gradescope course code announced on Piazza.
+</p>
+
+<!-- ========================================================================= -->
+
+<!-- COLLABORATION POLICY
+<!-- ========================================================================= -->
+
+<h1>Collaboration Policy</h1>
+<ul>
+<li>Every student has to work individually on this assignment.</li>
+<li>Students are allowed to discuss high-level details about the project with others.</li>
+<li>Students are <strong>not</strong> allowed to copy the contents of a white-board after a group meeting with other students.</li>
+<li>Students are <strong>not</strong> allowed to copy the solutions from another colleague.</li>
+</ul>
+<p class="warning bg-danger">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    <b>WARNING:</b> All of the code for this project must be your own. You may not copy source code from other students or other sources that you find on the web. Plagiarism <b>will not</b> be tolerated. See CMU's <a onclick="javascript:pageTracker._trackPageview('/outgoing/www.cmu.edu');" href="https://www.cmu.edu/policies/student-and-student-life/academic-integrity.html">Policy on Academic Integrity</a> for additional information.
+</p></p>
+                <div class="published">
+                    <time datetime="2020-11-01 11:12:56.151109-05:00"> <B>Last Updated:</B> Nov 01, 2020</time>
+                </div>
+            </section>
+        </div>
+    </section>
+</article>
+
+<!-- Footer -->
+<footer id="footer">
+
+    <ul class="icons">
+    </ul>
+    
+    <span class="copyright">
+    <a onclick="javascript:pageTracker._trackPageview('/outgoing/db.cs.cmu.edu');" href="https://db.cs.cmu.edu" title="Carnegie Mellon Database Group" class="image-link"><img src="../images/cmu-db-group.svg" class="cmudb-logo" /></a>
+    </span>
+
+</footer>    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-4067813-24"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    
+    gtag('config', 'UA-4067813-24');
+    </script>
+    <!-- End Google Analytics Code -->
+
+    <!-- Fix scrolling issues to internal HREFs that get positioned behind navbar -->
+    <!-- http://stackoverflow.com/questions/10732690/offsetting-an-html-anchor-to-adjust-for-fixed-header -->
+    <script src="../theme/js/href_scroll.js"></script>
+    
+</body>
+</html>

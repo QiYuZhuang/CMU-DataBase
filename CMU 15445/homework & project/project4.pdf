@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:og="https://ogp.me/ns#"
+      xmlns:fb="https://www.facebook.com/2008/fbml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    
+        <meta name="author" content="Andy Pavlo" />
+        <meta name="description" content="Do not post your project on a public GitHub repository. Overview The fourth programming project is to implement a lock manager in your database system and then use it to support concurrent query execution. A lock manager is responsible for keeping track of the tuple-level locks issued to transactions and supporting shared &amp; exclusive locks granted and released appropriately based on the isolation levels. The project is comprised of the following three tasks: Task #1 - Lock Manager Task #2 - Deadlock Detection Task #3 - Concurrent Query Execution This is a single-person project that will be completed individually (i.e., no groups). Release …" />
+    
+    <meta name="keywords" content="" />
+    <!--[if lte IE 8]><script src="../css/ie/html5shiv.js"></script><![endif]-->
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery.dropotron.min.js"></script>
+    <script src="../js/skel.min.js"></script>
+    <script src="../js/skel-layers.min.js"></script>
+    <script src="../js/init.js"></script>
+    <link rel="stylesheet" href="../css/pygment.css" />
+    <noscript>
+        <link rel="stylesheet" href="../css/skel.css" />
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/style-noscript.css" />
+    </noscript>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link  href="//fonts.googleapis.com/css?family=Anonymous+Pro:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css" >
+    <!--[if lte IE 8]><link rel="stylesheet" href="/css/ie/v8.css" /><![endif]-->
+    <!--[if lte IE 9]><link rel="stylesheet" href="/css/ie/v9.css" /><![endif]-->
+    
+    
+    <meta property="og:site_name" content="CMU 15-445/645" />
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="Project #4 - Concurrency Control - CMU 15-445/645 :: Intro to Database Systems (Fall 2020)"/>
+    <meta property="og:url" content="../project4/index.html"/>
+    <meta property="article:published_time" content="2020-12-06" />
+    <meta property="og:description" content="Do not post your project on a public GitHub repository. Overview The fourth programming project is to implement a lock manager in your database system and then use it to support concurrent query execution. A lock manager is responsible for keeping track of the tuple-level locks issued to transactions and supporting shared &amp; exclusive locks granted and released appropriately based on the isolation levels. The project is comprised of the following three tasks: Task #1 - Lock Manager Task #2 - Deadlock Detection Task #3 - Concurrent Query Execution This is a single-person project that will be completed individually (i.e., no groups). Release …" />
+        <meta property="og:image"
+              content="https://15445.courses.cs.cmu.edu/fall2020/images/twitter-card.jpg"/>
+
+    <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@CMUDB">
+        <meta name="twitter:creator" content="@CMUDB">
+    <meta name="twitter:domain" content="..">
+            <meta property="twitter:image"
+                  content="https://15445.courses.cs.cmu.edu/fall2020/images/twitter-card.jpg"/>
+    
+    
+    <link href="https://db.cs.cmu.edu/favicon.png" rel="icon">
+
+    <title>Project #4 - Concurrency Control | CMU 15-445/645 :: Intro to Database Systems (Fall 2020) </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width">
+</head>
+
+<body class="">
+
+    <!-- Header -->
+    <header id="header" >
+        <h1 class="logo">
+            <a href="..">CMU 15-445/645</a>
+        </h1>
+        <nav id="nav">
+            <ul>
+                <li ><a href="..">Home</a></li>
+                            <li><a href="../assignments.html">Assignments</a>
+                            <li><a href="../faq.html">FAQ</a>
+                            <li><a href="../schedule.html">Schedule</a>
+                            <li><a href="../syllabus.html">Syllabus</a>
+                <!--
+                <li class="submenu">
+                    <a href="../">Blog</a>
+                    <ul>
+                    </ul>
+                </li>
+                -->
+                <li> <a title="Piazza" href="https://piazza.com/cmu/fall2020/15445645/" target="_new"><i class="fa fa-comments-o"></i> Piazza</a>
+                
+                <li><a href="#" class="dropdown-toggle" data-toggle="dropdown"  data-hover="dropdown" data-delay="1000" data-close-others="true"> <i class="fa fa-book"></i> Archives <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2019/" target="_new">Fall 2019</a></li>
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2018/" target="_new">Fall 2018</a></li>
+                    <li><a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2017/" target="_new">Fall 2017</a></li>
+                </ul></li>
+            </ul>
+        </nav>
+    </header>
+
+<!-- Main -->
+<article id="main">
+
+    <header class="special container">
+        <span class="icon fa-database"></span>
+        <h2>Project #4 - Concurrency Control</h2>
+    </header>
+
+    <section class="wrapper style4 container">
+  
+        <!-- Content -->
+        <div class="content">
+            <section>
+                <p><p class="warning bg-fatal">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    Do <u>not</u> post your project on a public GitHub repository.
+</p>
+
+<!-- ========================================================================= -->
+
+<!-- OVERVIEW                                                                  -->
+
+<!-- ========================================================================= -->
+
+<h1>Overview</h1>
+<p>The fourth programming project is to implement a <b>lock manager</b> in your database system and then use it to support concurrent query execution. 
+A lock manager is responsible for keeping track of the <b>tuple-level locks</b> issued to transactions and supporting shared &amp; exclusive locks granted and released appropriately based on the isolation levels. </p>
+<p>The project is comprised of the following three tasks:
+<ul class="default">
+    <li> <a href="#lock_manager"><b>Task #1 - Lock Manager</b></a>
+    <li> <a href="#deadlock_detection"><b>Task #2 - Deadlock Detection</b></a>
+    <li> <a href="#execution_engine"><b>Task #3 - Concurrent Query Execution</b></a>
+</ul></p>
+<p>This is a single-person project that will be completed individually (i.e., no groups).</p>
+<!-- START project4 -->
+
+<!-- AUTO-GENERATED BY GENERATE-SCHEDULE SCRIPT -->
+
+<!-- ANY MODIFICATIONS WILL BE OVERWRITTEN -->
+
+<ul>
+<li><b>Release Date:</b> Nov 18, 2020</li>
+<li><b>Due Date:</b> Dec 13, 2020 @ 11:59pm
+<!-- END project4 --></li>
+</ul>
+<h1>Project Specification</h1>
+<p>Like the previous projects, we are providing you with stub classes that contain the API that you need to implement.
+You should <strong>not</strong> modify the signatures for the pre-defined functions in these classes.
+If you do this, it will break the test code that we will use to grade your assignment, and you will end up getting no credit for the project.
+If a class already contains certain member variables, you should <strong>not</strong> remove them.
+But you may add private helper functions/member variables to these classes in order to correctly realize the functionality.</p>
+<p>The correctness of this project depends on the correctness of your implementation of previous projects except the  concurrent B+ tree; we will <strong>not</strong> provide solutions or binary files.</p>
+<!-- **************************************************** -->
+
+<!-- Lock Manager                                         -->
+
+<!-- **************************************************** -->
+
+<h2 id="lock_manager">Task #1 - Lock Manager</h2>
+
+<p>To ensure correct interleaving of transactions' operations, the DBMS will use a lock manager (LM) to control when transactions are allowed to access data items.
+The basic idea of a LM is that it maintains an internal data structure about the locks currently held by active transactions.
+Transactions then issue lock requests to the LM before they are allowed to access a data item.
+The LM will either grant the lock to the calling transaction, block that transaction, or abort it.</p>
+<p>In your implementation, there will be a global LM for the entire system (similar to your buffer pool manager).
+The <code>TableHeap</code> and <code>Executor</code> classes will use your LM to acquire locks on tuple records (by record id <code>RID</code>) whenever a transaction wants to access/modify a tuple.
+<!-- The DBMS will only support **REPEATABLE READ** isolation level (i.e., you do not need to support range-locks so it cannot support **SERIALIZABLE** isolation). --></p>
+<p>This task requires you to implement a tuple-level LM that supports the three common isolation levels : READ_UNCOMMITED, READ_COMMITTED, and REPEATABLE_READ. The Lock Manager should grant or release locks according to a transaction's isolation level. Please refer to the <a onclick="javascript:pageTracker._trackPageview('/outgoing/15445.courses.cs.cmu.edu');" href="https://15445.courses.cs.cmu.edu/fall2020/slides/18-timestampordering.pdf#page=79">lecture slides</a> about the details.</p>
+<p>In the repository, we are providing you with a <code>Transaction</code> context handle (<tt class="filepath">include/concurrency/transaction.h</tt>) with an isolation level attribute (i.e., READ_UNCOMMITED, READ_COMMITTED, and REPEATABLE_READ) and information about its acquired locks. The LM will need to check the isolation level of transaction and expose correct behavior on lock/unlock requests. Any failed lock operation should lead to an ABORTED transaction state (implicit abort) and throw an exception. The transaction manager would further catch this exception and rollback write operations executed by the transaction.</p>
+<p>We recommend you to read <a onclick="javascript:pageTracker._trackPageview('/outgoing/www.justsoftwaresolutions.co.uk');" href="https://www.justsoftwaresolutions.co.uk/threading/locks-mutexes-semaphores.html">this article</a> to refresh your C++ concurrency knowledge. More detailed documentation is <a onclick="javascript:pageTracker._trackPageview('/outgoing/en.cppreference.com');" href="http://en.cppreference.com/w/cpp/thread">available here</a>.</p>
+<h3>REQUIREMENTS AND HINTS</h3>
+<p>The only file you need to modify for this task is the <code>LockManager</code> class (<tt class="filepath">concurrency/lock_manager.cpp</tt> and <tt class="filepath">concurrency/lock_manager.h</tt>). You will need to implement the following functions:</p>
+<ul class="default">
+    <li><code>LockShared(Transaction, RID)</code>:
+    Transaction <b>txn</b> tries to take a shared lock on record id <b>rid</b>. This should be blocked on waiting and should return true when granted. Return false if transaction is rolled back (aborts).
+
+    <li><code>LockExclusive(Transaction, RID)</code>:
+    Transaction <b>txn</b> tries to take an exclusive lock on record id <b>rid</b>. This should be blocked on waiting and should return true when granted. Return false if transaction is rolled back (aborts).
+
+    <li><code>LockUpgrade(Transaction, RID)</code>:
+    Transaction <b>txn</b> tries to upgrade a shared to exclusive lock on record id <b>rid</b>. This should be blocked on waiting and should return true when granted. Return false if transaction is rolled back (aborts). This should also abort the transaction and return false if another transaction is already waiting to upgrade their lock.
+
+    <li><code>Unlock(Transaction, RID)</code>:
+    Unlock the record identified by the given record id that is held by the transaction. 
+</ul>
+
+<p>The specific locking mechanism taken by the lock manager depends on the transaction isolation level. You should first take a look at the <tt class="filepath">transaction.h</tt> and <tt class="filepath">lock_manager.h</tt> to become familiar with the API and member variables we provide. We also recommend to review the isolation level concepts since the implementation of these functions shall be compatible with the isolation level of the transaction that is making the lock/unlock requests. You have the freedom of adding any necessary data structures in  <tt class="filepath">lock_manager.h</tt>. You should consult with Chapters 15.1-15.2 in the textbook and isolation level concepts covered in lectures to make sure your implementation satisfies the requirement.</p>
+<h3>Advice from the TAs</h3>
+
+<ul class="default">
+    <li> While your Lock Manager needs to use deadlock detection, we recommend implementing your lock manager first without any deadlock handling and then adding the detection mechanism after you verify it correctly locks and unlocks when no deadlocks occur.
+
+<li> You will need some way to keep track of which transactions are waiting on a lock. Take a look at <code>LockRequestQueue</code> class in <code>lock_manager.h</code>.
+
+    <li> You will need some way to notify transactions that are waiting when they may be up to grab the lock. We recommend using <code>std::condition_variable</code>
+
+    <li> Although some isolation levels are achieved by ensuring the properties of strict two phase locking, your implementation of lock manager is only required to ensure properties of two phase locking. The concept of strict 2PL will be achieved through the logic in your executors and transaction manager. Take a look at <code>Commit</code> and <code>Abort</code> methods there.
+
+    <li> You should also maintain state of transaction. For example, the states of transaction may be changed from <code>GROWING</code> phase to <code>SHRINKING</code> phase due to <code>unlock</code> operation (Hint: Look at the methods in <tt class="filepath">transaction.h</tt>)
+
+    <li>You should also keep track of the shared/exclusive lock acquired by a transaction using <code>shared_lock_set_</code> and <code>exclusive_lock_set_</code> so that when the <code>TransactionManager</code> wants to commit/abort a transaction, the LM can release them properly.
+
+    <li> Setting a transaction's state to ABORTED implicitly aborts it, but it is not explicitly aborted until <code>TransactionManager::Abort</code> is called.
+    You should read through this function to understand what it does, and how your lock manager is used in the abort process.
+</ul>
+
+<!-- **************************************************** -->
+
+<!-- Deadlock Detection                                   -->
+
+<!-- **************************************************** -->
+
+<h2 id="deadlock_detection">Task #2 - Deadlock Detection</h2>
+
+<p>Your lock manager should run deadlock detection in the background to abort blocking transactions.</p>
+<p>More precisely, this means that a background thread should periodically build a waits for graph <b>on the fly</b> and break any cycles.</p>
+<p>The graph API you must implement and use for your cycle detection along with testing is the following:</p>
+<ul class="default">
+    <li><code>AddEdge(txn_id_t t1, txn_id_t t2)</code>:
+    Adds an edge in your graph from t1 to t2.
+    If the edge already exists, you don't have to do anything.
+
+    <li><code>RemoveEdge(txn_id_t t1, txn_id_t t2)</code>:
+    Removes edge t1 to t2 from your graph. If no such edge exists, you don't have to do anything.
+
+    <li><code>HasCycle(txn_id_t& txn_id)</code>:
+    Looks for a cycle by using the <b>Depth First Search (DFS)</b> algorithm.
+    If it finds a cycle, <code>HasCycle</code> should store the transaction id of the <b>youngest</b> transaction in the cycle in <code>txn_id</code> and return true. Your function should return the first cycle it finds.
+    If your graph has no cycles, <code>HasCycle</code> should return false.
+
+    <li><code>GetEdgeList()</code>:
+    Returns a list of tuples representing the edges in your graph.
+    We will use this to test correctness of your graph.
+    A pair (t1,t2) corresponds to an edge from t1 to t2.
+
+    <li><code>RunCycleDetection()</code>:
+    Contains skeleton code for running cycle detection in the background.
+    You should implement your cycle detection logic in here.
+
+</ul>
+
+<p>How you choose to implement the graph is up to you as long as your implementation supports the above API. Those functions are what we will use to test your code.</p>
+<h3>REQUIREMENTS AND HINTS</h3>
+
+<ul class="default">
+
+    <li> Your background thread should build the graph on the fly every time it wakes up.
+    You should <b>not</b> be maintaining a graph, it should be built and destroyed every time the thread wakes up.
+
+    <li> Your DFS Cycle detection algorithm <b>must</b> be deterministic.
+    In order to do achieve this, you must always choose to explore the lowest transaction id first.
+    This means when choosing which <b>unexplored</b> node to run DFS from, always choose the node with the lowest transaction id.
+    This also means when exploring neighbors, explore them in sorted order from lowest to highest.
+
+    <li> When you find a cycle, you should abort the <b>youngest</b> transaction to break the cycle by setting that transactions state to ABORTED.
+
+    <li> When your detection thread wakes up, it is responsible for breaking <b>all</b> cycles that exist.
+    If you follow the above requirements, you will always find the cycles in a <b>deterministic</b> order.
+    This also means that when you are building your graph, you should <b>not</b> add nodes for aborted transactions or draw edges to aborted transactions.
+
+    <li> Your background cycle detection algorithm may need to get a pointer to a transaction using a <code>txn_id</code>. We have added a static method <code>Transaction* GetTransaction(txn_id_t txn_id)</code> to let you do that.
+
+    <li> You can use <code>std::this_thread::sleep_for</code> to order threads to write test cases.
+    You can also tweak <code>CYCLE_DETECTION_INTERVAL</code> in <tt class="filepath">common/config.h</tt> in your test cases.
+
+</ul>
+
+<h3>Advice from the TAs</h3>
+
+<ul class="default">
+
+    <li> Remember that a waits for graph is a <b>directed</b> graph.
+
+    <li> A waits for graph draws edges when a transaction is waiting for another transaction.
+    Remember that if multiple transactions hold a <b>shared</b> lock, a single transaction may be waiting on multiple transactions.
+
+    <li> When a transaction is aborted, make sure to set the transaction's state to <code>ABORTED</code> and throw an exception in your lock manager. The transaction manager will take care of the explicit abort and rollback changes.
+
+    <li> A transaction waiting for a lock may be aborted by the background cycle detection thread.
+    You must have a way to notify waiting transactions that they've been aborted.
+
+</ul>
+
+<!-- **************************************************** -->
+
+<!-- Concurrent Query Execution                           -->
+
+<!-- **************************************************** -->
+
+<h2 id="execution_engine">Task #3 - Concurrent Query Execution</h2>
+
+<p>During concurrent query execution, executors are required to lock/unlock tuples appropriately to achieve the isolation level specified in the corresponding transaction. To simplify this task, you can ignore concurrent index execution and just focus on table tuples. </p>
+<p>You will need to update the <code>Next()</code> methods of some executors (sequential scans, inserts, updates, deletes, nested loop joins, and aggregations) implemented in Project 3. Note that transactions would abort when lock/unlock fails.  Although there is no requirement of concurrent index execution, we still need to undo  all previous write operations on both table tuples and indexes appropriately on transaction abort. To achieve this, you will need to maintain the write sets in transactions, which is required by the <code>Abort()</code> method of transaction manager.</p>
+<p>You should not assume that a transaction only consists of one query. Specifically, this means a tuple might be accessed by different queries more than once in a transaction. Think about how you should handle this under different isolation levels.</p>
+<p>More specifically, you will need to add support for concurrent query execution in the following executors:
+<ul class="default">
+    <li> <tt class="filepath">src/execution/aggregation_executor.cpp</tt>
+    <li> <tt class="filepath">src/execution/delete_executor.cpp</tt>
+    <li> <tt class="filepath">src/execution/insert_executor.cpp</tt>
+    <li> <tt class="filepath">src/execution/nested_loop_executor.cpp</tt>
+    <li> <tt class="filepath">src/execution/seq_scan_executor.cpp</tt>
+    <li> <tt class="filepath">src/execution/update_executor.cpp</tt>
+</ul></p>
+<!-- ========================================================================= -->
+
+<!-- INSTRUCTIONS                                                              -->
+
+<!-- ========================================================================= -->
+
+<h1>Instructions</h1>
+<h2>Setting Up Your Development Environment</h2>
+<p>See the <a href="../project0/#instructions">Project #0 instructions</a> on how to create your private repository and setup your development environment.</p>
+<p class="warning bg-info">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    You must pull the latest changes on our BusTub repo for test files and other supplementary files we have provided for you. Run `git pull`. 
+</p>
+
+<h2>Testing</h2>
+<p>You can test the individual components of this assignment using our testing framework. We use <a onclick="javascript:pageTracker._trackPageview('/outgoing/github.com');" href="https://github.com/google/googletest">GTest</a> for unit test cases.
+You can compile and run each test individually from the command-line:</p>
+<pre>
+cd build
+make lock_manager_test
+make transaction_test
+./test/lock_manager_test
+./test/transaction_test
+</pre>
+
+<p><b>Important:</b> These tests are only a subset of the all the tests that we will use to evaluate and grade your project. You should write additional test cases on your own to check the complete functionality of your implementation.</p>
+<h2>Development Hints</h2>
+<p>To ensure your implementation does not have memory leak, you can run the test with <a onclick="javascript:pageTracker._trackPageview('/outgoing/valgrind.org');" href="http://valgrind.org/">Valgrind</a>.
+<pre>
+cd build
+make concurrency_control_test
+valgrind --trace-children=yes \
+   --leak-check=full \
+   --track-origins=yes \
+   --soname-synonyms=somalloc=<em>jemalloc</em> \
+   --error-exitcode=1 \
+   --suppressions=../third_party/valgrind/valgrind.supp \
+   ./test/concurrency_control_test
+</pre></p>
+<p>Instead of using <code>printf</code> statements for debugging, use the <code>LOG_*</code> macros for logging information like this:
+<pre>
+LOG_INFO("# Leaf Page: %s", leaf_page-&gt;ToString().c_str());
+LOG_DEBUG("Fetching page %d", page_id);
+</pre></p>
+<p>To enable logging in your project, you will need to reconfigure it like this:
+<pre>
+cd build
+cmake -DCMAKE_BUILD_TYPE=DEBUG ..
+make
+</pre></p>
+<p>The different logging levels are defined in <tt class="filepath">src/include/common/logger.h</tt>. After enabling logging, the logging level defaults to <code>LOG_LEVEL_INFO</code>. Any logging method with a level that is equal to or higher than <code>LOG_LEVEL_INFO</code> (e.g., <code>LOG_INFO</code>, <code>LOG_WARN</code>, <code>LOG_ERROR</code>) will emit logging information.</p>
+<p>Use <a onclick="javascript:pageTracker._trackPageview('/outgoing/www.cplusplus.com');" href="http://www.cplusplus.com/reference/cassert/assert/">assert </a>to force check the correctness of your implementation.</p>
+<p class="warning bg-danger">
+    <i class="trigger fa fa-question-circle fa-lg"></i>
+    Please post all of your questions about this project on Piazza. Do <b>not</b> email the TAs directly with questions. The instructor and TAs will <b>not</b> debug your code. Particularly with this project, we will not debug deadlocks.
+</p>
+
+<!-- ========================================================================= -->
+
+<!-- GRADING RUBRIC                                                            -->
+
+<!-- ========================================================================= -->
+
+<h1>Grading Rubric</h1>
+<p>Each project submission will be graded based on the following criteria:</p>
+<ol>
+<li>Does the submission successfully execute all of the test cases and produce the correct answer?</li>
+<li>Does the submission execute without any memory leaks?</li>
+</ol>
+<p>Note that we will use additional test cases that are more complex and go beyond the sample test cases that we provide you.</p>
+<!-- ========================================================================= -->
+
+<!-- LATE POLICY                                                               -->
+
+<!-- ========================================================================= -->
+
+<h1>Late Policy</h1>
+<p>See the <a href="#late-policy">late policy</a> in the syllabus.</p>
+<!-- ========================================================================= -->
+
+<!-- SUBMISSION                                                                -->
+
+<!-- ========================================================================= -->
+
+<h1 id="submission">Submission</h1>
+
+<p>After completing the assignment, you can submit your implementation of to Gradescope.</p>
+<p>You must include every file for Project #1, #2, and #3 in your submission zip file, as well as the following files:
+<ul class="default">
+    <li> <tt class="filepath">src/concurrency/lock_manager.cpp</tt>
+    <li> <tt class="filepath">src/include/concurrency/lock_manager.h</tt>
+</ul></p>
+<!-- ========================================================================= -->
+
+<!-- COLLABORATION POLICY                                                      -->
+
+<!-- ========================================================================= -->
+
+<h1>Collaboration Policy</h1>
+<ul>
+<li>Every student has to work individually on this assignment.</li>
+<li>Students are allowed to discuss high-level details about the project with others.</li>
+<li>Students are <strong>not</strong> allowed to copy the contents of a white-board after a group meeting with other students.</li>
+<li>Students are <strong>not</strong> allowed to copy the solutions from another colleague.</li>
+</ul>
+<p class="warning bg-danger">
+    <i class="trigger fa fa-exclamation-triangle fa-lg"></i>
+    <b>WARNING:</b> All of the code for this project must be your own. You may not copy source code from other students or other sources that you find on the web. Plagiarism <b>will not</b> be tolerated. See CMU's <a onclick="javascript:pageTracker._trackPageview('/outgoing/www.cmu.edu');" href="https://www.cmu.edu/policies/student-and-student-life/academic-integrity.html">Policy on Academic Integrity</a> for additional information.
+</p></p>
+                <div class="published">
+                    <time datetime="2020-12-06 09:57:27.776936-05:00"> <B>Last Updated:</B> Dec 06, 2020</time>
+                </div>
+            </section>
+        </div>
+    </section>
+</article>
+
+<!-- Footer -->
+<footer id="footer">
+
+    <ul class="icons">
+    </ul>
+    
+    <span class="copyright">
+    <a onclick="javascript:pageTracker._trackPageview('/outgoing/db.cs.cmu.edu');" href="https://db.cs.cmu.edu" title="Carnegie Mellon Database Group" class="image-link"><img src="../images/cmu-db-group.svg" class="cmudb-logo" /></a>
+    </span>
+
+</footer>    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-4067813-24"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    
+    gtag('config', 'UA-4067813-24');
+    </script>
+    <!-- End Google Analytics Code -->
+
+    <!-- Fix scrolling issues to internal HREFs that get positioned behind navbar -->
+    <!-- http://stackoverflow.com/questions/10732690/offsetting-an-html-anchor-to-adjust-for-fixed-header -->
+    <script src="../theme/js/href_scroll.js"></script>
+    
+</body>
+</html>
